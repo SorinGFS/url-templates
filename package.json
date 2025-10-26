@@ -1,0 +1,29 @@
+{
+  "name": "url-templates",
+  "version": "1.0.0",
+  "description": "A url-template validator, expander and inspector as defined by RFC 6570",
+  "keywords": [
+    "url",
+    "uri",
+    "template",
+    "url-template",
+    "uri-template",
+    "rfc6570",
+    "validation"
+  ],
+  "homepage": "https://github.com/SorinGFS/url-templates#readme",
+  "bugs": {
+    "url": "https://github.com/SorinGFS/url-templates/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SorinGFS/url-templates.git"
+  },
+  "license": "MIT",
+  "author": "SorinGFS",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
