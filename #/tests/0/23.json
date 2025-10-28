@@ -1,0 +1,5 @@
+{
+    "description": "invalid literal contains control character",
+    "data": "abc\u0001def",
+    "valid": false
+}

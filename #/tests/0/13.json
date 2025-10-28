@@ -1,0 +1,5 @@
+{
+    "description": "valid literal before, expression, literal after",
+    "data": "path/{foo}/end",
+    "valid": true
+}

@@ -1,0 +1,5 @@
+{
+    "description": "invalid consecutive varspec delimiters , ,",
+    "data": "{foo,,bar}",
+    "valid": false
+}

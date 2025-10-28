@@ -1,0 +1,5 @@
+{
+    "description": "invalid percent encoding (incomplete)",
+    "data": "{foo%2}",
+    "valid": false
+}

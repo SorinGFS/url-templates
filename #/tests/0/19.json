@@ -1,0 +1,5 @@
+{
+    "description": "valid expression: multiple keys separated by comma, each having prefix or explode",
+    "data": "{foo:2,bar*,baz:4}",
+    "valid": true
+}

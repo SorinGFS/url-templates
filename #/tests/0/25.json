@@ -1,0 +1,5 @@
+{
+    "description": "invalid literal character (space not allowed)",
+    "data": "foo bar",
+    "valid": false
+}

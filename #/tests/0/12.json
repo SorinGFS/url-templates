@@ -1,0 +1,5 @@
+{
+    "description": "valid only literal (no expressions)",
+    "data": "abc-XYZ_123~",
+    "valid": true
+}

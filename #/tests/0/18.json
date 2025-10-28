@@ -1,0 +1,5 @@
+{
+    "description": "valid expression: single key with explode",
+    "data": "{foo*}",
+    "valid": true
+}

@@ -1,0 +1,5 @@
+{
+    "description": "invalid consecutive prefix delimiters ::",
+    "data": "{foo::3}",
+    "valid": false
+}

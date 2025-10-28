@@ -1,0 +1,5 @@
+{
+    "description": "invalid operator (invalid symbol ^)",
+    "data": "{^foo}",
+    "valid": false
+}

@@ -1,0 +1,5 @@
+{
+    "description": "valid percent-encoded key",
+    "data": "{foo%20bar}",
+    "valid": true
+}

@@ -1,0 +1,5 @@
+{
+    "description": "valid mix of multiple expressions and literals",
+    "data": "http://example.com/{+path}/details/{id*}",
+    "valid": true
+}

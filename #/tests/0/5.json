@@ -1,0 +1,5 @@
+{
+    "description": "invalid prefix length (too large number)",
+    "data": "{foo:12345}",
+    "valid": false
+}

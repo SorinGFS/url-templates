@@ -1,0 +1,5 @@
+{
+    "description": "invalid } in literal part",
+    "data": "foo}bar",
+    "valid": false
+}

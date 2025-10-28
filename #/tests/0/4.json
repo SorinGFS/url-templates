@@ -1,0 +1,5 @@
+{
+    "description": "invalid prefix type (non-digit after :)",
+    "data": "{foo:ab}",
+    "valid": false
+}
