@@ -14,28 +14,29 @@ const ast = [];
 // url-template validator
 function isUrlTemplate(template, inspect) {
     if (typeof template !== 'string') throw new TypeError('uri-template must be a string.');
-    if (!/^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%{}]*$/.test(template)) throw new Error('invalid character(s) in uri-template.');
+    if (!/^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%{}]*$/.test(template)) throw new SyntaxError('invalid character(s) in uri-template.');
     for (let i = 0; i < template.length; ) {
         const start = template.indexOf('{', i);
-        if ((start === -1 && template.indexOf('}', i) > start) || template.indexOf('}', i) < start) throw new Error('unstarted expression in uri-template');
+        const nextClose = template.indexOf('}', i);
+        if (nextClose !== -1 && (start === -1 || nextClose < start)) throw new SyntaxError(`at index ${nextClose}: unstarted expression in uri-template.`);
         if (start === -1) { inspect && ast.push(template.slice(i)); break; }
         if (inspect && start > i) ast.push(template.slice(i, start));
         const end = template.indexOf('}', start + 1);
-        if (end === -1) throw new Error('unterminated expression in uri-template.');
+        const nestedStart = template.indexOf('{', start + 1);
+        if (end === -1 || (nestedStart !== -1 && nestedStart < end)) throw new SyntaxError(`at index ${start}: unterminated expression in uri-template.`);
         let expression = template.slice(start + 1, end);
-        if (expression.length === 0) throw new Error('empty expression.');
+        if (expression.length === 0) throw new SyntaxError(`at index ${start + 1}: empty expression.`);
         const first = expression[0];
         const operator = operators.has(first) ? ((expression = expression.slice(1)), first) : '';
-        if (expression.length === 0) throw new Error('expression missing variable names.');
+        if (expression.length === 0) throw new SyntaxError(`at index ${start + 2}: expression missing variable names.`);
         const varspecs = expression.split(',').map((key) => {
             const colon = key.indexOf(':');
             const limit = colon !== -1 ? Number(key.slice(colon + 1)) : null;
-            if (isDefined(limit) && (limit % 1 !== 0 || isNaN(limit) || limit < 1 || limit > 9999)) throw new Error('invalid limit modifier.');
+            if (isDefined(limit) && (limit % 1 !== 0 || isNaN(limit) || limit < 1 || limit > 9999)) throw new SyntaxError(`at index ${start}: invalid limit modifier.`);
             if (limit) key = key.slice(0, colon);
             const explode = key.endsWith('*');
-            if (explode && limit) throw new Error('invalid modifier having both explode and limit.');
             if (explode) key = key.slice(0, -1);
-            if (!/^(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})+(?:\.(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})+)*$/.test(key)) throw new Error('invalid variable name in uri-template.');
+            if (!/^(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})+(?:\.(?:[A-Za-z0-9_]|%[0-9A-Fa-f]{2})+)*$/.test(key)) throw new SyntaxError(`at index ${operator ? start + 2 : start + 1}: invalid variable name in uri-template.`);
             return Object.assign({ key }, limit ? { limit } : explode ? { explode } : {});
         });
         if (inspect) ast.push({ [operator]: varspecs });
@@ -62,7 +63,7 @@ function parseTemplate(template, validate) {
                                 if (match.length) string = string.substring(0, parseInt(match.length));
                                 values.push(encodeValue(operator, string, keyOperators.has(operator) ? key : ''));
                             } else {
-                                if (validate && match.length) throw new Error('invalid limit modifier on objects.');
+                                if (validate && match.length) throw new SyntaxError('invalid limit modifier on objects.');
                                 if (match.explode) {
                                     if (Array.isArray(value)) {
                                         value.filter(isDefined).forEach((item) => values.push(encodeValue(operator, item, keyOperators.has(operator) ? key : '')));
