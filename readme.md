@@ -40,7 +40,7 @@ It returns `true` or throws an `error`.
 ```js title="js"
 const { inspect } = require('url-templates');
 try {
-    console.dir(inspect('/search{?q*,lang:2}'), { depth: null }); 
+    console.dir(inspect('/search{?q*,lang:2}'), { depth: null });
     // [ '/search', { '?': [ { key: 'q', explode: true }, { key: 'lang', limit: 2 } ] } ]
 } catch (error) {
     console.error('invalid:', error.message);
@@ -69,9 +69,36 @@ If valid returns the `expand(vars)` function which returns the expanded `url-tem
 ```js title="js"
 const { compile } = require('url-templates');
 console.log(compile('/broken{').expand({})); // returns '/broken{'; invalid parts left for postprocessing
-console.log(compile('/good{id}').expand({id:42})); // returns '/good42'; 
+console.log(compile('/good{id}').expand({ id: 42 })); // returns '/good42';
+console.log(compile('/undefined{id}').expand({ id: undefined })); // returns '/undefined{id}';
 ```
 
 **Note:**
-Returns a usable expander without validation (for cases where validation is done elsewhere, or for the cases where some sort of postprocessing will follow).
+Returns a usable expander without validation for cases where validation is done elsewhere, or for the cases where some sort of postprocessing will follow. A good example of postprocessing is described next:
 
+### Multi pass expansion without validation
+
+**Example 1**
+
+```js title="js"
+const { compile } = require('url-templates');
+const vars1 = { anotherPattern: '{foo}', andAnotherPattern: '{bar,baz}' };
+const vars2 = { foo: 1, bar: 2, baz: 3 };
+const firstPass = decodeURIComponent(compile('[{anotherPattern},{andAnotherPattern}]').expand(vars1));
+console.log(firstPass); // returns '[{foo},{bar,baz}]';
+console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
+```
+
+**Example 2**
+
+```js title="js"
+const { compile } = require('url-templates');
+const vars1 = { foo: 1 };
+const vars2 = { bar: 2, baz: 3 };
+const firstPass = decodeURIComponent(compile('[{foo},{bar,baz}]').expand(vars1));
+console.log(firstPass); // returns '[1,{bar,baz}]';
+console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
+```
+
+**Important Note:**
+The first pass will preserve the `{bar,baz}` expression only if the supplied variable has **none** of its members. This method can also be used to preserve quantifiers like `{1,4}` in regular expresions.
