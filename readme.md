@@ -101,4 +101,24 @@ console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
 ```
 
 **Important Note:**
-The first pass will preserve the `{bar,baz}` expression only if the supplied variable has **none** of its members. This method can also be used to preserve quantifiers like `{1,4}` in regular expresions.
+The first pass will preserve the `{bar,baz}` expression only if the supplied variable has **none** of its members. This method can also be used to preserve quantifiers like `{1,4}` in regular expressions.
+
+### Recursively compile and expand without validation
+
+If all the required template members are present in a single `object`, then the above multi-pass compilation and expansion can be done recursively as follows:
+
+**Example 1**
+
+```js title="js"
+const { recursiveCompile } = require('url-templates');
+const vars = { start: '[{foo},{bar,baz}]', foo: 1, bar: 2, baz: 3 };
+console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
+```
+
+**Example 2**
+
+```js title="js"
+const { recursiveCompile } = require('url-templates');
+const vars = { start: '[{foo},{boo}]', boo: '{bar,baz}', foo: 1, bar: 2, baz: 3 };
+console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
+```

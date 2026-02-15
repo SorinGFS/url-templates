@@ -114,10 +114,21 @@ function parseTemplate(template, validate) {
             }),
     };
 }
+// recursive compile
+function recursiveCompile(vars, key) {
+    let prev;
+    let result = vars[key];
+    do {
+        prev = result;
+        result = decodeURIComponent(parseTemplate(result).expand(vars));
+    } while (result !== prev);
+    return result;
+}
 // export
 module.exports = {
     parseTemplate: (template) => parseTemplate(template, true),
     isUrlTemplate: (template) => isUrlTemplate(template),
     inspect: (template) => isUrlTemplate(template, true),
     compile: (template) => parseTemplate(template),
+    recursiveCompile,
 };
