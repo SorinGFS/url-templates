@@ -55,7 +55,7 @@ function isUrlTemplate(template, inspect) {
 function parseTemplate(template, validate) {
     if (validate) isUrlTemplate(template);
     return {
-        expand: (vars = {}) =>
+        expand: (vars = {}, callback) =>
             template.replace(/([^\{\}]+)|\{([^\{\}])([^\{\}]*)\}/g, (match, literal, first, expression) => {
                 if (first + expression) {
                     const values = [];
@@ -64,7 +64,7 @@ function parseTemplate(template, validate) {
                     expression.split(/,/g).forEach((variable) => {
                         const match = /(?<key>[^:\*]*)(?::(?<length>\d+)|(?<explode>\*))?/.exec(variable).groups;
                         const key = match.key;
-                        const value = vars[key];
+                        const value = typeof callback === 'function' ? callback(key) : vars[key];
                         if (!isDefined(value)) defined--;
                         if (isDefined(value) && value !== '') {
                             if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -115,12 +115,12 @@ function parseTemplate(template, validate) {
     };
 }
 // recursive compile
-function recursiveCompile(vars, key) {
+function recursiveCompile(vars, key, callback) {
     let prev;
     let result = vars[key];
     do {
         prev = result;
-        result = decodeURIComponent(parseTemplate(result).expand(vars));
+        result = decodeURIComponent(parseTemplate(result).expand(vars, callback));
     } while (result !== prev);
     return result;
 }

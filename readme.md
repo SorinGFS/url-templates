@@ -48,7 +48,7 @@ try {
 ```
 
 **Note:**
-Same as with `isUrlTemplate`, but if valid returns the parsed `AST` instead of `true`.
+- Same as with `isUrlTemplate`, but if valid returns the parsed `AST` instead of `true`.
 
 ### Expansion with validation
 
@@ -62,7 +62,7 @@ try {
 ```
 
 **Note:**
-If valid returns the `expand(vars)` function which returns the expanded `url-template`. Otherwise, it throws an `error`. The `expand` function also throws `error` if `limit` is defined on `objects` (`isUrlTemplate` function cannot know that without runtime vars).
+- If valid returns the `expand(vars)` function which returns the expanded `url-template`. Otherwise, it throws an `error`. The `expand` function also throws `error` if `limit` is defined on `objects` (`isUrlTemplate` function cannot know that without runtime vars).
 
 ### Expansion without validation
 
@@ -74,7 +74,7 @@ console.log(compile('/undefined{id}').expand({ id: undefined })); // returns '/u
 ```
 
 **Note:**
-Returns a usable expander without validation for cases where validation is done elsewhere, or for the cases where some sort of postprocessing will follow. A good example of postprocessing is described next:
+- Returns a usable expander without validation for cases where validation is done elsewhere, or for the cases where some sort of postprocessing will follow. A good example of postprocessing is described next:
 
 ### Multi pass expansion without validation
 
@@ -101,7 +101,21 @@ console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
 ```
 
 **Important Note:**
-The first pass will preserve the `{bar,baz}` expression only if the supplied variable has **none** of its members. This method can also be used to preserve quantifiers like `{1,4}` in regular expressions.
+- The first pass will preserve the `{bar,baz}` expression only if the supplied variable has **none** of its members. This method can also be used to preserve quantifiers like `{1,4}` in regular expressions.
+
+**Example 3 (transform with callback)**
+
+```js title="js"
+const { compile } = require('url-templates');
+const vars1 = { foo: 1 };
+const vars2 = { bar: 2, baz: 3 };
+const firstPass = decodeURIComponent(compile('[{foo},{bar,baz}]').expand(vars1));
+console.log(firstPass); // returns '[1,{bar,baz}]';
+console.log(compile(firstPass).expand(vars2, (key) => key === 'baz' ? vars2[key] * 10 : vars2[key])); // returns '[1,2,30]';
+```
+
+**Note:**
+- The optional `callback` function argument is present on each `expand` function.
 
 ### Recursively compile and expand without validation
 
@@ -121,4 +135,12 @@ console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
 const { recursiveCompile } = require('url-templates');
 const vars = { start: '[{foo},{boo}]', boo: '{bar,baz}', foo: 1, bar: 2, baz: 3 };
 console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
+```
+
+**Example 3 (transform with callback)**
+
+```js title="js"
+const { recursiveCompile } = require('url-templates');
+const vars = { start: '[{foo},{bar,baz}]', foo: 1, bar: 2, baz: 3 };
+console.log(recursiveCompile(vars, 'start', (key) => vars[key] * 2)); // returns '[2,4,6]';
 ```

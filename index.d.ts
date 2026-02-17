@@ -1,6 +1,6 @@
 /**
  * Validate a template.
- * Returns true or throws a detailed error.
+ * @returns true or throws a detailed error.
  *
  * @throws {TypeError | Error}
  */
@@ -8,30 +8,40 @@ declare function isUrlTemplate(template: string): boolean;
 
 /**
  * Inspect a template.
- * Returns the parsed AST.
+ * @returns the parsed AST.
  */
 declare function inspect(template: string): any[];
 
 /**
+ * Expand the compiled template by given vars.
+ * @param  vars - the object containing expansion variables.
+ * @param  callback - optional function that receives the current key and should return a replacement for current value.
+ * @returns the expanded template.
+ */
+declare function expand(vars: any, callback?: { key: string }): string
+
+/**
  * Parse and validate a template.
- * Returns an object with an expand() method.
+ * @returns an object with an expand() method.
  *
  * @throws {TypeError | Error}
  */
-declare function parseTemplate(template: string): { expand(vars?: any): string };
+declare function parseTemplate(template: string): { expand: typeof expand };
 
 /**
  * Compile a template without validation.
- * Returns an object with an expand() method.
+ * @returns an object with an expand() method.
  */
-declare function compile(template: string): { expand(vars?: any): string };
+declare function compile(template: string): { expand: typeof expand };
 
 /**
  * Recursively compile a template without validation.
- * The start template must be a vars[key].
- * Returns the recursively compiled and expanded template.
+ * @param  vars - the object containing expansion variables.
+ * @param  templateKey - starter template key, must be a vars[key].
+ * @param  callback - optional function that receives the current key and should return a replacement for current value.
+ * @returns the recursively compiled and expanded template.
  */
-declare function recursiveCompile(vars: object, templateKey: string): string;
+declare function recursiveCompile(vars: object, templateKey: string, callback?: { key: string } ): string;
 
 declare const urlTemplates: {
     isUrlTemplate: typeof isUrlTemplate;
