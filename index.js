@@ -14,9 +14,9 @@ const encodeValue = (operator, value, key) => {
     value = operator === '+' || operator === '#' ? encodeReserved(value) : encodeUnreserved(value);
     return key ? encodeReserved(key) + '=' + value : value;
 };
-const ast = [];
 // url-template validator
 function isUrlTemplate(template, inspect) {
+    const ast = [];
     if (typeof template !== 'string') throw new TypeError('uri-template must be a string.');
     if (!/^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%{}]*$/.test(template)) throw new SyntaxError('invalid character(s) in uri-template.');
     for (let i = 0; i < template.length; ) {
@@ -61,15 +61,19 @@ function parseTemplate(template, validate) {
                     const values = [];
                     const operator = operators.has(first) ? first : ((expression = first + expression), '');
                     let defined = expression.split(/,/g).length;
+                    // Expand each variable specification using the validator's relaxed modifier syntax.
                     expression.split(/,/g).forEach((variable) => {
-                        const match = /(?<key>[^:\*]*)(?::(?<length>\d+)|(?<explode>\*))?/.exec(variable).groups;
+                        const match = /(?<key>[^:\*]*)(?::(?<length>[^\*]+)|(?<explode>\*))?/.exec(variable).groups;
                         const key = match.key;
                         const value = typeof callback === 'function' ? callback(key) : vars[key];
                         if (!isDefined(value)) defined--;
                         if (isDefined(value) && value !== '') {
                             if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
                                 let string = value.toString();
-                                if (match.length) string = string.substring(0, parseInt(match.length));
+                                if (match.length) {
+                                    const limit = Number(match.length);
+                                    if (Number.isInteger(limit) && limit >= 1 && limit <= 9999) string = Array.from(string).slice(0, limit).join('');
+                                }
                                 values.push(encodeValue(operator, string, keyOperators.has(operator) ? key : ''));
                             } else {
                                 if (validate && match.length) throw new SyntaxError('invalid limit modifier on objects.');

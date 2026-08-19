@@ -1,3 +1,5 @@
+/** Type declarations for URL template validation, inspection, and expansion. */
+
 /**
  * Validate a template.
  * @returns true or throws a detailed error.
@@ -18,7 +20,7 @@ declare function inspect(template: string): any[];
  * @param  callback - optional function that receives the current key and should return a replacement for current value.
  * @returns the expanded template.
  */
-declare function expand(vars: any, callback?: { key: string }): string
+declare function expand(vars?: any, callback?: (key: string) => any): string;
 
 /**
  * Parse and validate a template.
@@ -41,7 +43,7 @@ declare function compile(template: string): { expand: typeof expand };
  * @param  callback - optional function that receives the current key and should return a replacement for current value.
  * @returns the recursively compiled and expanded template.
  */
-declare function recursiveCompile(vars: object, templateKey: string, callback?: { key: string } ): string;
+declare function recursiveCompile(vars: object, templateKey: string, callback?: (key: string) => any): string;
 
 declare const urlTemplates: {
     isUrlTemplate: typeof isUrlTemplate;
