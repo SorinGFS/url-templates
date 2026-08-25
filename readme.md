@@ -27,25 +27,6 @@ RFC 6570 calls these constructs **URI Templates** because they can produce absol
 npm i url-templates
 ```
 
-## Optional tests
-
-The test fixtures are maintained separately as public workspace data, so they are not included in the package or canonical repository. Users and contributors who need them can materialize them into a cloned repository with [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data).
-
-Install the GitHub CLI extension once:
-
-```bash title="console"
-gh extension install SorinGFS/gh-workspace-data
-```
-
-Then run the workspace-data commands from the repository:
-
-```bash title="console"
-gh workspace-data init
-gh workspace-data load
-```
-
-The tests are materialized as ordinary local files under `#/public/tests/` and remain excluded from the canonical Git repository.
-
 ## API
 
 ### Validate a template
@@ -427,9 +408,31 @@ A client can supply `book_id` to construct an author link for a book identified 
 
 </details>
 
-## Qualification
+## Tests
 
 The implementation has been checked against all 252 cases in the uritemplate-test suite and the package's validation fixtures.
+
+<details>
+<summary><strong>Optional Tests</strong></summary>
+
+The test fixtures are maintained separately as public workspace data, so they are not included in the package or canonical repository. Users and contributors who need them can materialize them into a cloned repository with [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data).
+
+Install the GitHub CLI extension once:
+
+```bash title="console"
+gh extension install SorinGFS/gh-workspace-data
+```
+
+Then run the workspace-data commands from the repository:
+
+```bash title="console"
+gh workspace-data init
+gh workspace-data load
+```
+
+The tests are materialized as ordinary local files under `#/public/tests/` and remain excluded from the canonical Git repository.
+
+</details>
 
 ## Authoritative references
 
