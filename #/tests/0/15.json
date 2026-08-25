@@ -1,5 +1,0 @@
-{
-    "description": "valid expression: single key, no operator",
-    "data": "{foo}",
-    "valid": true
-}

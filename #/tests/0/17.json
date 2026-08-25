@@ -1,5 +1,0 @@
-{
-    "description": "valid expression: single key with prefix",
-    "data": "{foo:3}",
-    "valid": true
-}

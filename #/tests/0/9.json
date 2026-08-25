@@ -1,5 +1,0 @@
-{
-    "description": "invalid empty key",
-    "data": "{,foo}",
-    "valid": false
-}

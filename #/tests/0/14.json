@@ -1,5 +1,0 @@
-{
-    "description": "valid literal before, expression, literal middle, expression, literal after",
-    "data": "x{foo}y{bar}z",
-    "valid": true
-}

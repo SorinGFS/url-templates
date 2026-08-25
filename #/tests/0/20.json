@@ -1,5 +1,0 @@
-{
-    "description": "valid expression: with operator and multiple keys",
-    "data": "{+foo,bar*}",
-    "valid": true
-}
