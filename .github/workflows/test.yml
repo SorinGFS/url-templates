@@ -1,0 +1,51 @@
+# Verify every public fixture across supported Node.js releases and operating systems.
+name: Cross-platform tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# Tests need read access to the project and its public workspace-data source.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Node.js ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20, 22, 24, 26]
+
+    steps:
+      # Check out the exact project revision selected by the workflow event.
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      # Install each supported Node.js runtime independently on every operating system.
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      # Check out only this project's test concern from the public workspace-data source.
+      - name: Check out public tests
+        uses: actions/checkout@v7
+        with:
+          repository: SorinGFS/public-data
+          ref: master
+          path: workspace-data
+          sparse-checkout: tests/github.com/SorinGFS/url-templates
+
+      # Reproduce the ordinary workspace layout consumed by the package test script.
+      - name: Materialize public tests
+        run: >-
+          node -e "require('node:fs').cpSync('workspace-data/tests/github.com/SorinGFS/url-templates', '#/public/tests', { recursive: true })"
+
+      # Execute every materialized fixture and propagate any failed assertion.
+      - name: Run tests
+        run: npm test

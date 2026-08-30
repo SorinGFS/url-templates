@@ -24,6 +24,10 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "test": "node ./#/public/tests"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "engineStrict": true
 }

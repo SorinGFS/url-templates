@@ -17,7 +17,7 @@ description: A URL Template validator, expander and inspector
 - callback-based value transformation;
 - multi-pass and recursive expansion.
 
-The package passes all 252 tests from the uritemplate-test suite. It is a zero-dependency CommonJS package.
+The package passes all 252 tests from the uritemplate-test suite plus 26 package-validation fixtures. It is a zero-dependency CommonJS package supporting Node.js 20 or newer.
 
 RFC 6570 calls these constructs **URI Templates** because they can produce absolute or relative URI references. This package retains **URL Templates** in its public name and API description.
 
@@ -410,10 +410,12 @@ A client can supply `book_id` to construct an author link for a book identified 
 
 ## Tests
 
-The implementation has been checked against all 252 cases in the uritemplate-test suite and the package's validation fixtures.
+The implementation has been checked against all 252 cases in the uritemplate-test suite and 26 package-validation fixtures.
+
+Continuous integration materializes the public test suite and runs all 278 checks on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
 
 <details>
-<summary><strong>Optional Tests</strong></summary>
+<summary><strong>Tests</strong></summary>
 
 The test fixtures are maintained separately as public workspace data, so they are not included in the package or canonical repository. Users and contributors who need them can materialize them into a cloned repository with [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data).
 
@@ -431,6 +433,14 @@ gh workspace-data load
 ```
 
 The tests are materialized as ordinary local files under `#/public/tests/` and remain excluded from the canonical Git repository.
+
+Run the materialized suite:
+
+```bash title="console"
+npm test
+```
+
+`npm test` exits unsuccessfully when any URI Template case or package-validation fixture fails.
 
 </details>
 
