@@ -408,16 +408,12 @@ A client can supply `book_id` to construct an author link for a book identified 
 
 </details>
 
-## Tests
+## Verification
 
-The implementation has been checked against all 252 cases in the uritemplate-test suite and 26 package-validation fixtures.
-
-Continuous integration materializes the public test suite and runs all 278 checks on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
+The test suite is maintained in [SorinGFS/public-data](https://github.com/SorinGFS/public-data) rather than in the package or canonical repository. The [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data) extension materializes it together with the shared `#/version-layers.js` runtime required by the test dispatcher.
 
 <details>
-<summary><strong>Tests</strong></summary>
-
-The test fixtures are maintained separately as public workspace data, so they are not included in the package or canonical repository. Users and contributors who need them can materialize them into a cloned repository with [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data).
+<summary><strong>gh-workspace-data usage</strong></summary>
 
 Install the GitHub CLI extension once:
 
@@ -425,14 +421,25 @@ Install the GitHub CLI extension once:
 gh extension install SorinGFS/gh-workspace-data
 ```
 
-Then run the workspace-data commands from the repository:
+Initialize and load workspace data from the cloned project repository:
 
 ```bash title="console"
 gh workspace-data init
 gh workspace-data load
 ```
 
-The tests are materialized as ordinary local files under `#/public/tests/` and remain excluded from the canonical Git repository.
+The extension materializes ordinary local files under `#/public/tests/`, while `#/version-layers.js` provides deterministic version-layer discovery. The generated `#/` namespace remains excluded from the canonical Git repository and npm package.
+
+Run `gh workspace-data load` again to refresh materialized tests after public-data changes or an extension upgrade.
+
+</details>
+
+### Tests
+
+The active suite contains 278 independently reported tests: all 252 cases from the external uritemplate-test suite plus 26 package-validation fixtures.
+
+<details>
+<summary><strong>Test details</strong></summary>
 
 Run the materialized suite:
 
@@ -440,7 +447,11 @@ Run the materialized suite:
 npm test
 ```
 
-`npm test` exits unsuccessfully when any URI Template case or package-validation fixture fails.
+The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher processes eligible version layers, numbered JSON fixtures, and explicit nonnumeric suite entry points in defined order. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
+
+The materialized `#/public/tests/README.md` documents fixture discovery, version eligibility, ordering, callback configuration, and suite registration. `npm test` exits unsuccessfully when configuration, fixture loading, suite registration, or a test fails.
+
+Continuous integration runs all 278 tests on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
 
 </details>
 
