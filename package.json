@@ -1,6 +1,6 @@
 {
   "name": "url-templates",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A url-template validator, expander and inspector as defined by RFC 6570",
   "keywords": [
     "url",
