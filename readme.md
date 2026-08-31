@@ -447,7 +447,7 @@ Run the materialized suite:
 npm test
 ```
 
-The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher processes eligible version layers, numbered JSON fixtures, and explicit nonnumeric suite entry points in defined order. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
+The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher delegates version-layer selection, numbered-fixture traversal, and explicit concern discovery to the `gh-workspace-data v0.5.0` runtime. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
 
 The materialized `#/public/tests/README.md` documents fixture discovery, version eligibility, ordering, callback configuration, and suite registration. `npm test` exits unsuccessfully when configuration, fixture loading, suite registration, or a test fails.
 
