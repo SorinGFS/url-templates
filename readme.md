@@ -410,7 +410,7 @@ A client can supply `book_id` to construct an author link for a book identified 
 
 ## Verification
 
-The test suite is maintained in [SorinGFS/public-data](https://github.com/SorinGFS/public-data) rather than in the package or canonical repository. The [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data) extension materializes it together with the shared `#/version-layers.js` runtime required by the test dispatcher.
+Tests and benchmarks are maintained in [SorinGFS/public-data](https://github.com/SorinGFS/public-data) rather than in the package or canonical repository. The [gh-workspace-data](https://github.com/SorinGFS/gh-workspace-data) extension materializes both concerns together with the shared `#/version-layers.js` runtime required by their portable coordinators.
 
 <details>
 <summary><strong>gh-workspace-data usage</strong></summary>
@@ -428,9 +428,9 @@ gh workspace-data init
 gh workspace-data load
 ```
 
-The extension materializes ordinary local files under `#/public/tests/`, while `#/version-layers.js` provides deterministic version-layer discovery. The generated `#/` namespace remains excluded from the canonical Git repository and npm package.
+The extension materializes ordinary local files under `#/public/tests/` and `#/public/benchmarks/`, while `#/version-layers.js` provides deterministic traversal support. The generated `#/` namespace remains excluded from the canonical Git repository and npm package.
 
-Run `gh workspace-data load` again to refresh materialized tests after public-data changes or an extension upgrade.
+Run `gh workspace-data load` again to refresh materialized data after public-data changes or an extension upgrade.
 
 </details>
 
@@ -452,6 +452,34 @@ The suite uses the `node:test` module built into Node.js and requires no separat
 The materialized `#/public/tests/README.md` documents fixture discovery, version eligibility, ordering, callback configuration, and suite registration. `npm test` exits unsuccessfully when configuration, fixture loading, suite registration, or a test fails.
 
 Continuous integration runs all 278 tests on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
+
+</details>
+
+### Benchmarks
+
+The materialized benchmark suite measures isolated package loading and representative simple and complex inputs across all five package exports.
+
+<details>
+<summary><strong>Benchmark details</strong></summary>
+
+Run the standard workload:
+
+```bash title="console"
+npm run benchmark
+```
+
+Run a reduced workload or emit machine-readable output directly:
+
+```bash title="console"
+node ./#/public/benchmarks --quick
+node ./#/public/benchmarks --quick --json
+```
+
+The 11 results cover package loading; validation and AST inspection; validated and unvalidated expander construction; and direct and multi-pass recursive expansion. The portable coordinator delegates version-layer selection and ordered concern discovery to the `gh-workspace-data v0.5.0` runtime.
+
+The harness records five initial calls, warmed minimum, median, 95th-percentile and maximum latency, and integer operations per second. Durations use milliseconds with six decimal places, and headings include the representative arguments. The default workload uses 100,000 iterations per sample. Custom iteration counts require direct invocation, for example `node ./#/public/benchmarks --iterations 250000`.
+
+`parseTemplate` and `compile` scenarios measure construction of their returned expander objects. `recursiveCompile` scenarios measure complete direct and multi-pass expansion. The materialized benchmark README documents every scenario, workload control, output field, and interpretation constraint.
 
 </details>
 
