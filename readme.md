@@ -447,7 +447,7 @@ Run the materialized suite:
 npm test
 ```
 
-The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher delegates version-layer selection, numbered-fixture traversal, and explicit concern discovery to the `gh-workspace-data v0.7.4` runtime. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
+The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher delegates version-layer selection, numbered-fixture traversal, and explicit concern discovery to the `gh-workspace-data v0.8.0` runtime. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
 
 Each numeric collection is a suite named by its schema `description`; its cases report the package-root-relative fixture path followed by the fixture `description`. Each named uritemplate-test group is a suite whose heading includes its package-root-relative JSON source path; its cases report the template under test.
 
@@ -477,7 +477,7 @@ node ./#/public/benchmarks --quick
 node ./#/public/benchmarks --quick --json
 ```
 
-The 11 results cover package loading; validation and AST inspection; validated and unvalidated expander construction; and direct and multi-pass recursive expansion. The portable coordinator delegates version-layer selection and ordered concern discovery to the `gh-workspace-data v0.7.4` runtime.
+The 11 results cover package loading; validation and AST inspection; validated and unvalidated expander construction; and direct and multi-pass recursive expansion. The portable coordinator delegates version-layer selection and ordered concern discovery to the `gh-workspace-data v0.8.0` runtime.
 
 The harness records five initial calls, warmed minimum, median, 95th-percentile and maximum latency, and integer operations per second. Durations use milliseconds with six decimal places, and headings include the representative arguments. The default workload uses 100,000 iterations per sample. Custom iteration counts require direct invocation, for example `node ./#/public/benchmarks --iterations 250000`.
 
