@@ -17,7 +17,7 @@ description: A URL Template validator, expander and inspector
 - callback-based value transformation;
 - multi-pass and recursive expansion.
 
-The package passes all 252 tests from the uritemplate-test suite plus 26 package-validation fixtures. It is a zero-dependency CommonJS package supporting Node.js 20 or newer.
+The package passes 285 tests across 22 suites: all 252 cases from the uritemplate-test suite plus 33 package-validation fixtures. It is a zero-dependency CommonJS package supporting Node.js 20 or newer.
 
 RFC 6570 calls these constructs **URI Templates** because they can produce absolute or relative URI references. This package retains **URL Templates** in its public name and API description.
 
@@ -52,15 +52,15 @@ It returns `true` or throws an `error`.
 
 ### Inspect a template
 
-`inspect(template)` performs the same validation and returns an AST containing literal segments, operators, variable names, prefix limits, and explode modifiers.
+`inspectUrlTemplate(template)` performs the same validation and returns an AST containing literal segments, operators, variable names, prefix limits, and explode modifiers.
 
 <details>
 <summary><strong>Examples and behavior</strong></summary>
 
 ```js title="js"
-const { inspect } = require('url-templates');
+const { inspectUrlTemplate } = require('url-templates');
 try {
-    console.dir(inspect('/search{?q*,lang:2}'), { depth: null });
+    console.dir(inspectUrlTemplate('/search{?q*,lang:2}'), { depth: null });
     // [ '/search', { '?': [ { key: 'q', explode: true }, { key: 'lang', limit: 2 } ] } ]
 } catch (error) {
     console.error('invalid:', error.message);
@@ -74,15 +74,15 @@ try {
 
 ### Expand with validation
 
-`parseTemplate(template)` validates the template and returns an object with an `expand(vars, callback)` method.
+`parseUrlTemplate(template)` validates the template and returns an object with an `expand(vars, callback)` method.
 
 <details>
 <summary><strong>Examples and behavior</strong></summary>
 
 ```js title="js"
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 try {
-    console.log(parseTemplate('/items/{id}').expand({ id: 42 })); // '/items/42'
+    console.log(parseUrlTemplate('/items/{id}').expand({ id: 42 })); // '/items/42'
 } catch (error) {
     console.error('parse/validation error:', error.message);
 }
@@ -95,16 +95,16 @@ try {
 
 ### Expand without validation
 
-`compile(template)` returns the same expander without first validating the template. Use it when validation occurs elsewhere or when unresolved or invalid parts must remain available for later processing.
+`compileUrlTemplate(template)` returns the same expander without first validating the template. Use it when validation occurs elsewhere or when unresolved or invalid parts must remain available for later processing.
 
 <details>
 <summary><strong>Examples and behavior</strong></summary>
 
 ```js title="js"
-const { compile } = require('url-templates');
-console.log(compile('/broken{').expand({})); // returns '/broken{'; invalid parts left for postprocessing
-console.log(compile('/good{id}').expand({ id: 42 })); // returns '/good42';
-console.log(compile('/undefined{id}').expand({ id: undefined })); // returns '/undefined{id}';
+const { compileUrlTemplate } = require('url-templates');
+console.log(compileUrlTemplate('/broken{').expand({})); // returns '/broken{'; invalid parts left for postprocessing
+console.log(compileUrlTemplate('/good{id}').expand({ id: 42 })); // returns '/good42';
+console.log(compileUrlTemplate('/undefined{id}').expand({ id: undefined })); // returns '/undefined{id}';
 ```
 
 **Note:**
@@ -122,23 +122,23 @@ Multi-pass expansion allows one set of variables to reveal templates for a later
 **Example 1**
 
 ```js title="js"
-const { compile } = require('url-templates');
+const { compileUrlTemplate } = require('url-templates');
 const vars1 = { anotherPattern: '{foo}', andAnotherPattern: '{bar,baz}' };
 const vars2 = { foo: 1, bar: 2, baz: 3 };
-const firstPass = decodeURIComponent(compile('[{anotherPattern},{andAnotherPattern}]').expand(vars1));
+const firstPass = decodeURIComponent(compileUrlTemplate('[{anotherPattern},{andAnotherPattern}]').expand(vars1));
 console.log(firstPass); // returns '[{foo},{bar,baz}]';
-console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
+console.log(compileUrlTemplate(firstPass).expand(vars2)); // returns '[1,2,3]';
 ```
 
 **Example 2**
 
 ```js title="js"
-const { compile } = require('url-templates');
+const { compileUrlTemplate } = require('url-templates');
 const vars1 = { foo: 1 };
 const vars2 = { bar: 2, baz: 3 };
-const firstPass = decodeURIComponent(compile('[{foo},{bar,baz}]').expand(vars1));
+const firstPass = decodeURIComponent(compileUrlTemplate('[{foo},{bar,baz}]').expand(vars1));
 console.log(firstPass); // returns '[1,{bar,baz}]';
-console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
+console.log(compileUrlTemplate(firstPass).expand(vars2)); // returns '[1,2,3]';
 ```
 
 **Important Note:**
@@ -147,12 +147,12 @@ console.log(compile(firstPass).expand(vars2)); // returns '[1,2,3]';
 **Example 3 (transform with callback)**
 
 ```js title="js"
-const { compile } = require('url-templates');
+const { compileUrlTemplate } = require('url-templates');
 const vars1 = { foo: 1 };
 const vars2 = { bar: 2, baz: 3 };
-const firstPass = decodeURIComponent(compile('[{foo},{bar,baz}]').expand(vars1));
+const firstPass = decodeURIComponent(compileUrlTemplate('[{foo},{bar,baz}]').expand(vars1));
 console.log(firstPass); // returns '[1,{bar,baz}]';
-console.log(compile(firstPass).expand(vars2, (key) => key === 'baz' ? vars2[key] * 10 : vars2[key])); // returns '[1,2,30]';
+console.log(compileUrlTemplate(firstPass).expand(vars2, (key) => key === 'baz' ? vars2[key] * 10 : vars2[key])); // returns '[1,2,30]';
 ```
 
 **Note:**
@@ -162,7 +162,7 @@ console.log(compile(firstPass).expand(vars2, (key) => key === 'baz' ? vars2[key]
 
 ### Recursively expand without validation
 
-`recursiveCompile(vars, templateKey, callback)` repeatedly expands `vars[templateKey]` until the result stabilizes. If all required template members are present in one object, it performs the multi-pass process automatically.
+`recursiveCompileUrlTemplate(vars, templateKey, callback)` repeatedly expands `vars[templateKey]` until the result stabilizes. If all required template members are present in one object, it performs the multi-pass process automatically.
 
 <details>
 <summary><strong>Examples and behavior</strong></summary>
@@ -170,25 +170,25 @@ console.log(compile(firstPass).expand(vars2, (key) => key === 'baz' ? vars2[key]
 **Example 1**
 
 ```js title="js"
-const { recursiveCompile } = require('url-templates');
+const { recursiveCompileUrlTemplate } = require('url-templates');
 const vars = { start: '[{foo},{bar,baz}]', foo: 1, bar: 2, baz: 3 };
-console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
+console.log(recursiveCompileUrlTemplate(vars, 'start')); // returns '[1,2,3]';
 ```
 
 **Example 2**
 
 ```js title="js"
-const { recursiveCompile } = require('url-templates');
+const { recursiveCompileUrlTemplate } = require('url-templates');
 const vars = { start: '[{foo},{boo}]', boo: '{bar,baz}', foo: 1, bar: 2, baz: 3 };
-console.log(recursiveCompile(vars, 'start')); // returns '[1,2,3]';
+console.log(recursiveCompileUrlTemplate(vars, 'start')); // returns '[1,2,3]';
 ```
 
 **Example 3 (transform with callback)**
 
 ```js title="js"
-const { recursiveCompile } = require('url-templates');
+const { recursiveCompileUrlTemplate } = require('url-templates');
 const vars = { start: '[{foo},{bar,baz}]', foo: 1, bar: 2, baz: 3 };
-console.log(recursiveCompile(vars, 'start', (key) => vars[key] * 2)); // returns '[2,4,6]';
+console.log(recursiveCompileUrlTemplate(vars, 'start', (key) => vars[key] * 2)); // returns '[2,4,6]';
 ```
 
 </details>
@@ -198,13 +198,13 @@ console.log(recursiveCompile(vars, 'start', (key) => vars[key] * 2)); // returns
 The library separates syntax validation from expansion so callers can choose strict parsing or tolerant postprocessing:
 
 1. `isUrlTemplate` checks the input type, literal characters, expression boundaries, operators, variable names, and modifiers.
-2. `inspect` performs that validation while recording literals and parsed variable specifications in an AST.
-3. `parseTemplate` validates once before creating an expander; `compile` creates the expander without validation.
+2. `inspectUrlTemplate` performs that validation while recording literals and parsed variable specifications in an AST.
+3. `parseUrlTemplate` validates once before creating an expander; `compileUrlTemplate` creates the expander without validation.
 4. Expansion obtains each value from `vars[key]`, or from `callback(key)` when a callback is supplied.
 5. Undefined and `null` values are omitted during validated expansion. In non-validated expansion, a wholly unresolved expression is retained for later processing.
 6. Strings, numbers, and booleans expand as scalar values. Arrays and objects follow RFC 6570 list, associative, prefix, and explode behavior.
 7. Simple expansion percent-encodes reserved characters. Reserved (`+`) and fragment (`#`) expansion preserve characters that may carry URI structure.
-8. `recursiveCompile` decodes each expansion result and repeats until two successive results are identical.
+8. `recursiveCompileUrlTemplate` decodes each expansion result and repeats until two successive results are identical.
 
 <details>
 <summary><strong>Expansion model and modifiers</strong></summary>
@@ -223,7 +223,7 @@ The library separates syntax validation from expansion so callers can choose str
 - `{var:3}` limits a scalar expansion to the first three Unicode characters.
 - `{var*}` explodes a list or associative value into separate components.
 
-Prefix modifiers intentionally accept positive JavaScript numeric forms that resolve to integers from 1 through 9999, including forms commonly emitted by YAML tooling. Prefix expansion counts Unicode code points rather than UTF-16 code units.
+Prefix modifiers accept decimal integers from 1 through 9999 without leading zeros. Prefix expansion counts Unicode code points rather than UTF-16 code units.
 
 </details>
 
@@ -237,9 +237,9 @@ URI Templates describe related resources without manual concatenation or manual 
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const repositoryUrl = parseTemplate('https://api.github.com/repos/{owner}/{repo}');
+const repositoryUrl = parseUrlTemplate('https://api.github.com/repos/{owner}/{repo}');
 console.log(repositoryUrl.expand({ owner: 'example-owner', repo: 'url templates' }));
 // https://api.github.com/repos/example-owner/url%20templates
 ```
@@ -256,9 +256,9 @@ Query expansion inserts `?` and `&` only when values are present. Exploded array
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const search = parseTemplate('/search{?q,tags*,page,per_page}');
+const search = parseUrlTemplate('/search{?q,tags*,page,per_page}');
 console.log(search.expand({
     q: 'URI templates',
     tags: ['api', 'hypermedia'],
@@ -282,9 +282,9 @@ An API response can provide a template whose final path or query values are know
 GitHub repository representations, for example, expose content links ending in `{+path}`:
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const contentUrl = parseTemplate(
+const contentUrl = parseUrlTemplate(
     'https://api.github.com/repos/{owner}/{repo}/contents/{+path}'
 );
 console.log(contentUrl.expand({
@@ -307,9 +307,9 @@ Exploded path segments support file trees, category paths, nested resources, and
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const files = parseTemplate('/files{/segments*}');
+const files = parseUrlTemplate('/files{/segments*}');
 console.log(files.expand({ segments: ['images', 'hero banner.jpg'] }));
 // /files/images/hero%20banner.jpg
 ```
@@ -326,9 +326,9 @@ Deployment metadata and generated clients often vary hosts, ports, and base path
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const server = parseTemplate('https://{tenant}.example.com:{port}/{basePath}');
+const server = parseUrlTemplate('https://{tenant}.example.com:{port}/{basePath}');
 console.log(server.expand({ tenant: 'demo', port: 8443, basePath: 'v2' }));
 // https://demo.example.com:8443/v2
 ```
@@ -345,9 +345,9 @@ Prefix modifiers can map large identifier spaces into hierarchical storage.
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { parseTemplate } = require('url-templates');
+const { parseUrlTemplate } = require('url-templates');
 
-const objectPath = parseTemplate('/objects/{hash:2}/{hash}');
+const objectPath = parseUrlTemplate('/objects/{hash:2}/{hash}');
 console.log(objectPath.expand({ hash: 'abcdef' }));
 // /objects/ab/abcdef
 ```
@@ -364,9 +364,9 @@ Linters, documentation generators, request builders, and schema-backed forms can
 <summary><strong>Example and context</strong></summary>
 
 ```js
-const { inspect } = require('url-templates');
+const { inspectUrlTemplate } = require('url-templates');
 
-console.dir(inspect('/search{?q,tags*}'), { depth: null });
+console.dir(inspectUrlTemplate('/search{?q,tags*}'), { depth: null });
 // [ '/search', { '?': [ { key: 'q' }, { key: 'tags', explode: true } ] } ]
 ```
 
@@ -395,7 +395,7 @@ A client can supply `book_id` to construct an author link for a book identified 
 <summary><strong>Behavioral and security considerations</strong></summary>
 
 - A URI Template is not itself a URI and must be expanded before being used as one.
-- `compile` and `recursiveCompile` deliberately skip validation. Use `parseTemplate` when the template source is not already validated.
+- `compileUrlTemplate` and `recursiveCompileUrlTemplate` deliberately skip validation. Use `parseUrlTemplate` when the template source is not already validated.
 - Syntax validation does not establish that an expanded URI is trustworthy, reachable, authorized, or appropriate for a particular application.
 - Reserved and fragment expansions can preserve URI-structural characters. Do not insert untrusted values into `{+var}` or `{#var}` without considering the resulting URI.
 - URI Templates generate URI references; they are not a general reverse-routing grammar. RFC 6570 recommends regular expressions when variable extraction from existing URIs is required.
@@ -403,7 +403,7 @@ A client can supply `book_id` to construct an author link for a book identified 
 - A prefix modifier is valid for scalar values, not arrays or objects. Validated expansion throws if a prefix modifier is applied to a composite value.
 - Composite members used with reserved or fragment expansion should be strings.
 - A callback replaces object lookup for every variable encountered during that expansion.
-- Recursive expansion must converge. Cyclic or continually changing substitutions can prevent `recursiveCompile` from terminating.
+- Recursive expansion must converge. Cyclic or continually changing substitutions can prevent `recursiveCompileUrlTemplate` from terminating.
 - Relative results must be resolved against a base URI by the calling application when an absolute URI is required.
 
 </details>
@@ -436,7 +436,7 @@ Run `gh workspace-data load` again to refresh materialized data after public-dat
 
 ### Tests
 
-The active suite contains 278 independently reported tests: all 252 cases from the external uritemplate-test suite plus 26 package-validation fixtures.
+The active test run contains 285 independently reported tests across 22 suites: all 252 cases from the external uritemplate-test suite plus 33 package-validation fixtures.
 
 <details>
 <summary><strong>Test details</strong></summary>
@@ -449,9 +449,11 @@ npm test
 
 The suite uses the `node:test` module built into Node.js and requires no separate test-runner dependency. Its deterministic dispatcher delegates version-layer selection, numbered-fixture traversal, and explicit concern discovery to the `gh-workspace-data v0.5.0` runtime. `#/public/tests/index.json` selects the package's `isUrlTemplate` callback for validation fixtures, while the external expansion suite receives the package API from the root dispatcher.
 
+Each numeric collection is a suite named by its schema `description`; its cases report the package-root-relative fixture path followed by the fixture `description`. Each named uritemplate-test group is a suite whose heading includes its package-root-relative JSON source path; its cases report the template under test.
+
 The materialized `#/public/tests/README.md` documents fixture discovery, version eligibility, ordering, callback configuration, and suite registration. `npm test` exits unsuccessfully when configuration, fixture loading, suite registration, or a test fails.
 
-Continuous integration runs all 278 tests on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
+Continuous integration runs all 285 tests on Node.js 20, 22, 24, and 26 across Ubuntu, Windows, and macOS.
 
 </details>
 
@@ -479,7 +481,7 @@ The 11 results cover package loading; validation and AST inspection; validated a
 
 The harness records five initial calls, warmed minimum, median, 95th-percentile and maximum latency, and integer operations per second. Durations use milliseconds with six decimal places, and headings include the representative arguments. The default workload uses 100,000 iterations per sample. Custom iteration counts require direct invocation, for example `node ./#/public/benchmarks --iterations 250000`.
 
-`parseTemplate` and `compile` scenarios measure construction of their returned expander objects. `recursiveCompile` scenarios measure complete direct and multi-pass expansion. The materialized benchmark README documents every scenario, workload control, output field, and interpretation constraint.
+`parseUrlTemplate` and `compileUrlTemplate` scenarios measure construction of their returned expander objects. `recursiveCompileUrlTemplate` scenarios measure complete direct and multi-pass expansion. The materialized benchmark README documents every scenario, workload control, output field, and interpretation constraint.
 
 </details>
 

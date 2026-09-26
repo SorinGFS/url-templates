@@ -12,7 +12,7 @@ declare function isUrlTemplate(template: string): boolean;
  * Inspect a template.
  * @returns the parsed AST.
  */
-declare function inspect(template: string): any[];
+declare function inspectUrlTemplate(template: string): any[];
 
 /**
  * Expand the compiled template by given vars.
@@ -28,13 +28,13 @@ declare function expand(vars?: any, callback?: (key: string) => any): string;
  *
  * @throws {TypeError | Error}
  */
-declare function parseTemplate(template: string): { expand: typeof expand };
+declare function parseUrlTemplate(template: string): { expand: typeof expand };
 
 /**
  * Compile a template without validation.
  * @returns an object with an expand() method.
  */
-declare function compile(template: string): { expand: typeof expand };
+declare function compileUrlTemplate(template: string): { expand: typeof expand };
 
 /**
  * Recursively compile a template without validation.
@@ -43,14 +43,14 @@ declare function compile(template: string): { expand: typeof expand };
  * @param  callback - optional function that receives the current key and should return a replacement for current value.
  * @returns the recursively compiled and expanded template.
  */
-declare function recursiveCompile(vars: object, templateKey: string, callback?: (key: string) => any): string;
+declare function recursiveCompileUrlTemplate(vars: object, templateKey: string, callback?: (key: string) => any): string;
 
 declare const urlTemplates: {
     isUrlTemplate: typeof isUrlTemplate;
-    inspect: typeof inspect;
-    parseTemplate: typeof parseTemplate;
-    compile: typeof compile;
-    recursiveCompile: typeof recursiveCompile;
+    inspectUrlTemplate: typeof inspectUrlTemplate;
+    parseUrlTemplate: typeof parseUrlTemplate;
+    compileUrlTemplate: typeof compileUrlTemplate;
+    recursiveCompileUrlTemplate: typeof recursiveCompileUrlTemplate;
 };
 
 export = urlTemplates;

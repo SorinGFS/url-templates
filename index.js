@@ -18,7 +18,7 @@ const encodeValue = (operator, value, key) => {
 function isUrlTemplate(template, inspect) {
     const ast = [];
     if (typeof template !== 'string') throw new TypeError('uri-template must be a string.');
-    if (!/^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%{}]*$/.test(template)) throw new SyntaxError('invalid character(s) in uri-template.');
+    if (!/^(?:%[0-9A-Fa-f]{2}|[\u{21}\u{23}-\u{24}\u{26}-\u{3B}\u{3D}\u{3F}-\u{5B}\u{5D}\u{5F}\u{61}-\u{7B}\u{7D}-\u{7E}\u{A0}-\u{D7FF}\u{E000}-\u{FDCF}\u{FDF0}-\u{FFEF}\u{10000}-\u{1FFFD}\u{20000}-\u{2FFFD}\u{30000}-\u{3FFFD}\u{40000}-\u{4FFFD}\u{50000}-\u{5FFFD}\u{60000}-\u{6FFFD}\u{70000}-\u{7FFFD}\u{80000}-\u{8FFFD}\u{90000}-\u{9FFFD}\u{A0000}-\u{AFFFD}\u{B0000}-\u{BFFFD}\u{C0000}-\u{CFFFD}\u{D0000}-\u{DFFFD}\u{E1000}-\u{EFFFD}\u{F0000}-\u{FFFFD}\u{100000}-\u{10FFFD}])*$/u.test(template)) throw new SyntaxError('invalid character(s) in uri-template.');
     for (let i = 0; i < template.length; ) {
         const start = template.indexOf('{', i);
         const nextClose = template.indexOf('}', i);
@@ -38,8 +38,12 @@ function isUrlTemplate(template, inspect) {
         if (expression.length === 0) throw new SyntaxError(`at index ${start + 2}: expression missing variable names.`);
         const varspecs = expression.split(',').map((key) => {
             const colon = key.indexOf(':');
-            const limit = colon !== -1 ? Number(key.slice(colon + 1)) : null;
-            if (isDefined(limit) && (limit % 1 !== 0 || isNaN(limit) || limit < 1 || limit > 9999)) throw new SyntaxError(`at index ${start}: invalid limit modifier.`);
+            let limit;
+            if (colon !== -1) {
+                const limitString = key.slice(colon + 1);
+                if (!/^[1-9][0-9]{0,3}$/.test(limitString)) throw new SyntaxError(`at index ${start}: invalid limit modifier.`);
+                else limit = Number(limitString);
+            }
             if (limit) key = key.slice(0, colon);
             const explode = key.endsWith('*');
             if (explode) key = key.slice(0, -1);
@@ -52,7 +56,7 @@ function isUrlTemplate(template, inspect) {
     return inspect ? ast : true;
 }
 // url-template filler with optional validation
-function parseTemplate(template, validate) {
+function parseUrlTemplate(template, validate) {
     if (validate) isUrlTemplate(template);
     return {
         expand: (vars = {}, callback) =>
@@ -119,20 +123,20 @@ function parseTemplate(template, validate) {
     };
 }
 // recursive compile
-function recursiveCompile(vars, key, callback) {
+function recursiveCompileUrlTemplate(vars, key, callback) {
     let prev;
     let result = vars[key];
     do {
         prev = result;
-        result = decodeURIComponent(parseTemplate(result).expand(vars, callback));
+        result = decodeURIComponent(parseUrlTemplate(result).expand(vars, callback));
     } while (result !== prev);
     return result;
 }
 // export
 module.exports = {
-    parseTemplate: (template) => parseTemplate(template, true),
     isUrlTemplate: (template) => isUrlTemplate(template),
-    inspect: (template) => isUrlTemplate(template, true),
-    compile: (template) => parseTemplate(template),
-    recursiveCompile,
+    inspectUrlTemplate: (template) => isUrlTemplate(template, true),
+    parseUrlTemplate: (template) => parseUrlTemplate(template, true),
+    compileUrlTemplate: (template) => parseUrlTemplate(template),
+    recursiveCompileUrlTemplate,
 };
